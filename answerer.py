@@ -2,7 +2,7 @@
 """GitHub Actions: escucha en 51417372, acepta llamada y responde con ANSWER + DataChannel."""
 import os, re, ssl, base64, hashlib, socket, threading, time, uuid, json, asyncio, logging, fractions
 import requests, urllib3
-from aiortc import RTCPeerConnection, RTCSessionDescription
+from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.mediastreams import AudioStreamTrack, VideoStreamTrack
 from av import AudioFrame, VideoFrame
 
@@ -307,7 +307,23 @@ class Answerer:
     async def _responder_offer(self, offer_sdp):
         try:
             log.info("*** Creando RTCPeerConnection + DataChannel")
-            self.pc = RTCPeerConnection()
+                        # Pedir TURN a ToDus antes de crear la PC
+            ice_servers = []
+            try:
+                from todus import ToDusClient2
+                turn_client = ToDusClient2(phone_number=self.phone)
+                turn_resp = turn_client.request_turn_credentials()
+                log.info(f"*** TURN response: {turn_resp}")
+                if isinstance(turn_resp, dict) and turn_resp.get("urls"):
+                    ice_servers.append(RTCIceServer(
+                        urls=turn_resp["urls"],
+                        username=turn_resp.get("username"),
+                        credential=turn_resp.get("credential"),
+                    ))
+                    log.info(f"*** TURN añadido: {turn_resp['urls']}")
+            except Exception as e:
+                log.warning(f"*** No se pudo obtener TURN: {e}")
+            self.pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=ice_servers))
             self._dump_sdp("OFFER-REMOTE", offer_sdp)
 
             @self.pc.on("icecandidate")
