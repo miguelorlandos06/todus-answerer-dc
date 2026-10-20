@@ -8,12 +8,12 @@ from av import AudioFrame, VideoFrame
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-PHONE = os.environ.get("TODUS_PHONE", "51417372")
+PHONE = os.environ.get("TODUS_PHONE", "5351417372")
 AUTH_URL = "https://auth.todus.cu/v2/auth/token"
 XMPP_HOST = os.environ.get("XMPP_HOST", "ws.todus.cu")
 XMPP_PORT = int(os.environ.get("XMPP_PORT", "1756"))
 XMPP_DOMAIN = "im.todus.cu"
-FAKE_SECRET = "fake1234567890abcdef12345678"
+FAKE_SECRET = "00000000-0000-0000-0000-000000000000"
 RECV_BUFFER = 65536
 RUNTIME = int(os.environ.get("RUNTIME", "300"))
 
