@@ -1,0 +1,34 @@
+name: ToDus Recibir Canción
+on:
+  workflow_dispatch:
+    inputs:
+      runtime:
+        description: "Segundos"
+        required: false
+        default: "300"
+      audio_url:
+        description: "URL de la canción (opcional, usa la default)"
+        required: false
+        default: ""
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libavdevice-dev libavfilter-dev libopus-dev libvpx-dev pkg-config libsrtp2-dev
+          pip install --upgrade pip
+          pip install aiortc==1.10.1 av==13.1.0 requests aiohttp
+      - name: Run answerer con canción
+        env:
+          TODUS_PHONE: ${{ secrets.TODUS_PHONE_ANS }}
+          RUNTIME: ${{ inputs.runtime }}
+          AUDIO_URL: ${{ inputs.audio_url }}
+          VPS: "false"
+        run: python recibir_cancion.py
