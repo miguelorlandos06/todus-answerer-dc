@@ -443,7 +443,11 @@ class Answerer:
             f'status="ICE" content="{b64(content)}"/></iq>', "ICE")
 
     async def _apply_ice(self, payload):
-        parts = payload.split(" ", 2)
+        # Acepta "mid mline candidate" (aiortc) y "mid$mline$candidate" (app oficial)
+        if "$" in payload and payload.count("$") >= 2:
+            parts = payload.split("$", 2)
+        else:
+            parts = payload.split(" ", 2)
         if len(parts) != 3:
             log.warning(f"ICE mal formado: {payload[:100]!r}"); return
         mid, mline, cand = parts
